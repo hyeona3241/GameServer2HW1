@@ -1,41 +1,13 @@
 // IOCP_EchoServer.cpp
 #include "IOCP_EchoServer.h"
 
-// -------------------- BufferPool 구현 --------------------
-
-// 고정 크기 버퍼 풀 생성자: 미리 지정된 개수만큼 버퍼를 할당해둠
-BufferPool::BufferPool(size_t blockSize, size_t initialCount) : blockSize_(blockSize) {
-    for (size_t i = 0; i < initialCount; ++i)
-        pool_.push_back(new char[blockSize_]);
-}
-
-// 버퍼 풀 소멸자: 남아있는 버퍼 모두 해제
-BufferPool::~BufferPool() {
-    for (auto* p : pool_) delete[] p;
-}
-
-// 버퍼 임대: 풀에 남은 버퍼가 있으면 반환, 없으면 새로 할당
-char* BufferPool::Allocate() {
-    std::lock_guard<std::mutex> lock(mtx_);
-    if (pool_.empty()) return new char[blockSize_];
-    char* buf = pool_.back(); pool_.pop_back();
-    return buf;
-}
-
-// 버퍼 반납: 사용이 끝난 버퍼를 풀에 다시 넣음
-void BufferPool::Release(char* buf) {
-    std::lock_guard<std::mutex> lock(mtx_);
-    pool_.push_back(buf);
-}
-
-// -------------------- IOCP_EchoServer 구현 --------------------
 
 // 생성자: 포트, 워커 스레드 수, AcceptEx 개수 등 초기화
 IOCP_EchoServer::IOCP_EchoServer(unsigned short port, int workerCount, int acceptCount)
     : listenSocket_(INVALID_SOCKET), iocpHandle_(NULL), running_(false), port_(port),
     fnAcceptEx_(nullptr), fnGetAcceptExSockaddrs_(nullptr),
-    bufferPool_(BUFFER_SIZE, 128), sessionIdGen_(1),
-    acceptOutstanding_(acceptCount ? acceptCount : DEFAULT_ACCEPT),
+    bufferPool_(NetConfig::BUFFER_SIZE, 128), sessionIdGen_(1),
+    acceptOutstanding_(acceptCount ? acceptCount : NetConfig::DEFAULT_ACCEPT),
     workerCount_(workerCount ? workerCount : (int)std::thread::hardware_concurrency()),
     statCurConn_(0), statAccept_(0), statRecv_(0), statSend_(0)
 {
@@ -200,7 +172,7 @@ void IOCP_EchoServer::PostRecv(Session* session) {
     session->ovRecv.op = OverlappedEx::OP_RECV;
     session->ovRecv.session = session;
     session->ovRecv.wsaBuf.buf = session->rxBuf + session->rxUsed;
-    session->ovRecv.wsaBuf.len = BUFFER_SIZE - (ULONG)session->rxUsed;
+    session->ovRecv.wsaBuf.len = NetConfig::BUFFER_SIZE - (ULONG)session->rxUsed;
 
     DWORD flags = 0, recvBytes = 0;
     int ret = WSARecv(session->sock, &session->ovRecv.wsaBuf, 1, &recvBytes, &flags, &session->ovRecv, NULL);

@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36408.4 d17.14
+VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EchoClient", "..\EchoClient\EchoClient.vcxproj", "{33A30F62-CC02-4C0F-B564-7CD0BE6EEDC6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EchoClient", "EchoClient\EchoClient.vcxproj", "{33A30F62-CC02-4C0F-B564-7CD0BE6EEDC6}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IOCP_Basic", "..\IOCP_Basic\IOCP_Basic.vcxproj", "{BF1A8A85-06A2-4B69-8532-EAC311C9B27F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IOCP_Basic", "IOCP_Basic\IOCP_Basic.vcxproj", "{BF1A8A85-06A2-4B69-8532-EAC311C9B27F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Common", "Common\Common.vcxproj", "{134FC59D-CEFF-4157-AEF6-2D032B55EA61}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,14 @@ Global
 		{BF1A8A85-06A2-4B69-8532-EAC311C9B27F}.Release|x64.Build.0 = Release|x64
 		{BF1A8A85-06A2-4B69-8532-EAC311C9B27F}.Release|x86.ActiveCfg = Release|Win32
 		{BF1A8A85-06A2-4B69-8532-EAC311C9B27F}.Release|x86.Build.0 = Release|Win32
+		{134FC59D-CEFF-4157-AEF6-2D032B55EA61}.Debug|x64.ActiveCfg = Debug|x64
+		{134FC59D-CEFF-4157-AEF6-2D032B55EA61}.Debug|x64.Build.0 = Debug|x64
+		{134FC59D-CEFF-4157-AEF6-2D032B55EA61}.Debug|x86.ActiveCfg = Debug|Win32
+		{134FC59D-CEFF-4157-AEF6-2D032B55EA61}.Debug|x86.Build.0 = Debug|Win32
+		{134FC59D-CEFF-4157-AEF6-2D032B55EA61}.Release|x64.ActiveCfg = Release|x64
+		{134FC59D-CEFF-4157-AEF6-2D032B55EA61}.Release|x64.Build.0 = Release|x64
+		{134FC59D-CEFF-4157-AEF6-2D032B55EA61}.Release|x86.ActiveCfg = Release|Win32
+		{134FC59D-CEFF-4157-AEF6-2D032B55EA61}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -39,3 +39,37 @@
 
 # debug information files
 *.dwo
+
+# Visual Studio specific
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]uild/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+# Visual Studio cache files
+*.VC.db
+*.VC.VC.opendb
+*.ipch
+
+# Others
+*.db
+*.cache
+*.tlog
+*.idb
+*.ilk
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
