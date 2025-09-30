@@ -1,0 +1,65 @@
+#pragma once
+
+#include <cstdint>
+#include <string>
+
+enum class PacketType : uint16_t {
+    None = 0,
+    ChatMessage = 1,   // 일반 채팅 메시지
+    Exit = 2,   // 종료 패킷
+    UserCount = 3    // 접속자 수 확인
+    // 필요 시 계속 추가
+};
+
+#pragma pack(push, 1)
+struct PacketHeader {
+    uint16_t size;
+    uint16_t id;    // PacketType 값
+
+    PacketHeader() : size(0), id(0) {}
+    PacketHeader(PacketType t, uint16_t s) : size(s), id(static_cast<uint16_t>(t)) {}
+};
+#pragma pack(pop)
+
+
+// 메시지 구조체
+// 내부/로그용
+struct ChatMessageData {
+    std::string sender;
+    std::string message;
+    uint64_t timestamp;
+};
+
+// 전송용
+#pragma pack(push, 1)
+struct ChatMessagePacket {
+    PacketHeader header;
+    char sender[32];
+    char message[256];
+    uint64_t timestamp;
+};
+#pragma pack(pop)
+
+
+// 내부->전송용 변환
+ChatMessagePacket ToPacket(const ChatMessageData & data) {
+    ChatMessagePacket pkt{};
+    pkt.header = PacketHeader(PacketType::ChatMessage, sizeof(ChatMessagePacket));
+
+    strncpy(pkt.sender, data.sender.c_str(), sizeof(pkt.sender) - 1);
+    strncpy(pkt.message, data.message.c_str(), sizeof(pkt.message) - 1);
+
+    pkt.timestamp = data.timestamp;
+    return pkt;
+}
+
+// 전송용 -> 내부 변환
+ChatMessageData ToData(const ChatMessagePacket& pkt) {
+    ChatMessageData data;
+
+    data.sender = pkt.sender;
+    data.message = pkt.message;
+    data.timestamp = pkt.timestamp;
+
+    return data;
+}

@@ -134,9 +134,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="IPacket.h" />
+    <ClInclude Include="PacketDef.h" />
+    <ClInclude Include="PKChatMessage.h" />
+    <ClInclude Include="PKExit.h" />
+    <ClInclude Include="PKUserCount.h" />
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="IPacket.cpp" />
+    <ClCompile Include="PKChatMessage.cpp" />
+    <ClCompile Include="PKExit.cpp" />
+    <ClCompile Include="PKUserCount.cpp" />
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
