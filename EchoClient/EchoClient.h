@@ -11,13 +11,6 @@ private:
 	WSADATA wsaData_{};
 	std::atomic<bool> running_{ false };
 
-	// 송신 경로(택1)
-	// (A) 콘솔을 sendLoop에서 직접 getline()하여 바로 send
-	// (B) 외부에서 push → sendLoop가 큐를 비우며 send
-	std::mutex              sendMtx_;
-	std::condition_variable sendCv_;
-	std::queue<std::string> sendQ_;
-
 	// 수신 버퍼
 	char rxBuf_[NetConfig::BUFFER_SIZE ];
 
