@@ -1,7 +1,6 @@
 // IOCP_EchoServer.cpp
 #include "IOCP_EchoServer.h"
 
-
 // 생성자: 포트, 워커 스레드 수, AcceptEx 개수 등 초기화
 IOCP_EchoServer::IOCP_EchoServer(unsigned short port, int workerCount, int acceptCount)
     : listenSocket_(INVALID_SOCKET), iocpHandle_(NULL), running_(false), port_(port),
@@ -55,12 +54,16 @@ bool IOCP_EchoServer::Start() {
     statThread_ = std::thread(&IOCP_EchoServer::StatThread, this);
 
     std::cout << "[INFO] 서버 시작, 포트: " << port_ << ", 워커: " << workerCount_ << ", AcceptEx: " << acceptOutstanding_ << std::endl;
+
+    Logger::Instance().Init("logs", "server");
+    Logger::Instance().Info("Server started on port " + std::to_string(port_));
     return true;
 }
 
 // 서버 정지: 스레드 종료, 소켓/핸들/세션/버퍼 정리
 void IOCP_EchoServer::Stop() {
     if (!running_) return;
+    Logger::Instance().Info("Server stopping...");
     running_ = false;
 
     closesocket(listenSocket_);
@@ -84,6 +87,7 @@ void IOCP_EchoServer::Stop() {
 
     CloseHandle(iocpHandle_);
     WSACleanup();
+    Logger::Instance().Shutdown();
 }
 
 // AcceptEx, GetAcceptExSockaddrs 확장 함수 포인터 로딩
@@ -162,6 +166,8 @@ void IOCP_EchoServer::AcceptCompletion(OverlappedEx* ov, DWORD /*bytes*/) {
     // 다음 AcceptEx 즉시 재등록(항상 N개 유지)
     PostAccept();
 
+    handler_.OnClientConnected(session);
+
     delete ov;
 }
 
@@ -192,19 +198,22 @@ void IOCP_EchoServer::RecvCompletion(Session* session, DWORD bytes) {
     session->rxUsed += bytes;
     statRecv_++;
 
-    // --- 채팅: 모든 세션에 메시지 브로드캐스트 ---
-    std::vector<Session*> sessions;
-    {
-        std::lock_guard<std::mutex> lock(sessionMtx_);
-        for (auto& kv : sessionTable_) {
-            sessions.push_back(kv.second);
-        }
-    }
-    for (Session* s : sessions) {
-        // 자기 자신에게도 메시지 전송(원하면 if (s != session)로 제외 가능)
-        if (s != session)
-            EnqueueSend(s, session->rxBuf, session->rxUsed);
-    }
+    //// --- 채팅: 모든 세션에 메시지 브로드캐스트 ---
+    //std::vector<Session*> sessions;
+    //{
+    //    std::lock_guard<std::mutex> lock(sessionMtx_);
+    //    for (auto& kv : sessionTable_) {
+    //        sessions.push_back(kv.second);
+    //    }
+    //}
+    //for (Session* s : sessions) {
+    //    // 자기 자신에게도 메시지 전송(원하면 if (s != session)로 제외 가능)
+    //    if (s != session)
+    //        EnqueueSend(s, session->rxBuf, session->rxUsed);
+    //}
+    //session->rxUsed = 0;
+
+    handler_.OnBytes(session, session->rxBuf, session->rxUsed);
     session->rxUsed = 0;
 
     // 다음 수신 요청 등록(연속 수신)
@@ -280,6 +289,25 @@ void IOCP_EchoServer::CloseSession(Session* session) {
     }
     statCurConn_--;
     delete session;
+}
+
+int IOCP_EchoServer::GetCurrentConnectionCount() const
+{
+    return statCurConn_.load();
+}
+
+void IOCP_EchoServer::Broadcast(const char* data, size_t len, Session* exclude)
+{
+    std::vector<Session*> snapshot;
+    {
+        std::lock_guard<std::mutex> lock(sessionMtx_);
+        snapshot.reserve(sessionTable_.size());
+        for (auto& kv : sessionTable_) snapshot.push_back(kv.second);
+    }
+    for (Session* s : snapshot) {
+        if (s == exclude) continue;
+        EnqueueSend(s, data, len); 
+    }
 }
 
 // IOCP 워커 스레드: 모든 I/O 완료 이벤트를 처리

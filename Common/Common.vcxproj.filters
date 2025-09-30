@@ -33,6 +33,9 @@
     <ClInclude Include="PKUserCount.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Utility.cpp">
@@ -48,6 +51,12 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="PKUserCount.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketDef.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

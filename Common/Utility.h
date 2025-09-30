@@ -32,6 +32,10 @@
 	#include <chrono>
 	#include <iostream>
 
+	#include "PKChatMessage.h"
+	#include "PKExit.h"
+	#include "PKUserCount.h"
+
 #elif defined(CORE_CLIENT)
 
 	// 클라 전용
@@ -43,6 +47,10 @@
 	#include <iostream>
 	#include <mutex>
 	#include <queue>
+
+	#include "PKChatMessage.h"
+	#include "PKExit.h"
+	#include "PKUserCount.h"
 
 #else
 	// 아무 타깃도 지정 안 됐을 때 경고

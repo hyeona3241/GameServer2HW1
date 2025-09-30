@@ -135,6 +135,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="IPacket.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="PacketDef.h" />
     <ClInclude Include="PKChatMessage.h" />
     <ClInclude Include="PKExit.h" />
@@ -143,6 +144,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IPacket.cpp" />
+    <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="PacketDef.cpp" />
     <ClCompile Include="PKChatMessage.cpp" />
     <ClCompile Include="PKExit.cpp" />
     <ClCompile Include="PKUserCount.cpp" />

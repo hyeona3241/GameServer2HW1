@@ -1,5 +1,7 @@
 #pragma once
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <cstdint>
 #include <string>
 
@@ -42,24 +44,6 @@ struct ChatMessagePacket {
 
 
 // 내부->전송용 변환
-ChatMessagePacket ToPacket(const ChatMessageData & data) {
-    ChatMessagePacket pkt{};
-    pkt.header = PacketHeader(PacketType::ChatMessage, sizeof(ChatMessagePacket));
-
-    strncpy(pkt.sender, data.sender.c_str(), sizeof(pkt.sender) - 1);
-    strncpy(pkt.message, data.message.c_str(), sizeof(pkt.message) - 1);
-
-    pkt.timestamp = data.timestamp;
-    return pkt;
-}
-
+ChatMessagePacket ToPacket(const ChatMessageData& data) noexcept;
 // 전송용 -> 내부 변환
-ChatMessageData ToData(const ChatMessagePacket& pkt) {
-    ChatMessageData data;
-
-    data.sender = pkt.sender;
-    data.message = pkt.message;
-    data.timestamp = pkt.timestamp;
-
-    return data;
-}
+ChatMessageData   ToData(const ChatMessagePacket& pkt);

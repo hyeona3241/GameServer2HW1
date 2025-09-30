@@ -133,11 +133,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="IOCP_EchoServer.h" />
+    <ClInclude Include="PacketHandler.h" />
     <ClInclude Include="ServerTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IOCP_EchoServer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PacketHandler.cpp" />
     <ClCompile Include="ServerTypes.cpp" />
   </ItemGroup>
   <ItemGroup>

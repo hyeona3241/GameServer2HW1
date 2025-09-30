@@ -100,29 +100,85 @@ void EchoClient::receiveLoop()
             break;
         }
         rxBuf_[received] = '\0';
-        std::cout << "서버 응답: " << rxBuf_ << std::endl;
+        std::cout << rxBuf_/* << std::endl*/;
     }
     // 수신이 끝나면 전체 종료
     stop();
 }
 
 void EchoClient::sendLoop()
-{
+{ 
+    std::cout << "메시지를 보낼 수 있습니다 (/나가기, /접속자수, /에러로그)\n";
+
     while (running_) {
-        std::string msg;
-        std::cout << "보낼 메시지(q 입력시 종료): ";
-        if (!std::getline(std::cin, msg)) {
+        std::string line;
+        if (!std::getline(std::cin, line)) break;
+
+        if (nickname_.empty() && line != "/나가기" && line != "/접속자수" && line != "/에러로그") {
+            nickname_ = line;
+            std::cout << "[알림] 아이디가 '" << nickname_ << "'(으)로 설정되었습니다.\n\n";
+            continue;
+        }
+
+        if (line == "/나가기") {
+            PKExit pk;
+            if (!sendPacket(pk)) std::cout << "Exit 패킷 전송 실패\n";
             break;
         }
-        if (msg == "q" || msg == "Q") {
-            break;
+        else if (line == "/접속자수") {
+            PKUserCount pk;
+            if (!sendPacket(pk)) std::cout << "UserCount 패킷 전송 실패\n";
+            continue;
         }
-        int sent = send(sock_, msg.c_str(), (int)msg.size(), 0);
-        if (sent <= 0) {
-            std::cout << "send 실패\n";
-            break;
+        else if (line == "/에러로그") {
+            struct FakePacket {
+                PacketHeader header;
+                char dummy[4];
+            } fake{};
+
+            fake.header = PacketHeader(PacketType::ChatMessage,
+                static_cast<uint16_t>(9999)); // 잘못된 크기 보내서 체크
+
+            sendBytesAll(reinterpret_cast<char*>(&fake), sizeof(fake));
+            std::cout << "[테스트] 잘못된 패킷을 전송했습니다.\n";
+            continue;
+        }
+        else {
+            ChatMessageData data;
+            data.sender = nickname_.empty() ? "Unknown" : nickname_;
+            data.message = line;
+            data.timestamp = nowUnixMillis();
+
+            PKChatMessage pk(data);
+            if (!sendPacket(pk)) {
+                std::cout << "ChatMessage 패킷 전송 실패\n";
+                break;
+            }
         }
     }
-    // 송신 루프 종료 시 전체 종료
     stop();
+}
+
+bool EchoClient::sendPacket(const IPacket& pkt) {
+    auto bytes = pkt.Serialize();
+
+    return sendBytesAll(bytes.data(), bytes.size());
+}
+
+bool EchoClient::sendBytesAll(const char* data, size_t len) {
+    size_t sentTotal = 0;
+
+    while (sentTotal < len) {
+        int s = ::send(sock_, data + sentTotal, (int)(len - sentTotal), 0);
+        if (s <= 0) return false;
+        sentTotal += s;
+    }
+
+    return true;
+}
+
+uint64_t EchoClient::nowUnixMillis() {
+    using namespace std::chrono;
+
+    return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }

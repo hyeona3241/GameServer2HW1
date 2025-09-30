@@ -3,15 +3,26 @@
 
 #include <Utility.h>
 #include "ServerTypes.h"
+#include "PacketHandler.h"
+#include "Logger.h"
 
 // IOCP 기반 에코 서버 클래스
-class IOCP_EchoServer {
+class IOCP_EchoServer : public ISendClose {
 public:
     // 포트, 워커 스레드 수, AcceptEx 개수 지정(0이면 자동 결정)
     IOCP_EchoServer(unsigned short port, int workerCount = 0, int acceptCount = 0);
     ~IOCP_EchoServer();
     bool Start();    // 서버 시작
     void Stop();     // 서버 정지 및 리소스 해제
+
+    // 송신 큐에 데이터 추가 및 필요시 송신 시작
+    void EnqueueSend(Session* s, const char* data, size_t len) override;
+    // 세션 종료 및 리소스 반환(이중 종료 방지)
+    void CloseSession(Session* s) override;
+    int  GetCurrentConnectionCount() const override;
+
+    void Broadcast(const char* data, size_t len, Session* exclude) override;
+
 private:
     // 확장 함수(WSAIoctl로 AcceptEx 등) 로딩
     void LoadExtensionFunctions();
@@ -23,16 +34,12 @@ private:
     void RecvCompletion(Session* session, DWORD bytes);
     // WSASend 완료 처리(송신 큐에 남은 데이터 있으면 재송신)
     void SendCompletion(Session* session, DWORD bytes);
-    // 세션 종료 및 리소스 반환(이중 종료 방지)
-    void CloseSession(Session* session);
     // IOCP 워커 스레드 함수(모든 I/O 완료 처리)
     void WorkerThread();
     // 통계 출력 스레드(1초마다 상태 출력)
     void StatThread();
     // 수신 요청 등록(WSARecv)
     void PostRecv(Session* session);
-    // 송신 큐에 데이터 추가 및 필요시 송신 시작
-    void EnqueueSend(Session* session, const char* data, size_t len);
     // 실제 송신 요청(WSASend)
     void PostSend(Session* session);
 
@@ -59,4 +66,6 @@ private:
     std::atomic<int> statAccept_;
     std::atomic<int> statRecv_;
     std::atomic<int> statSend_;
+
+    PacketHandler handler_{ this };
 };

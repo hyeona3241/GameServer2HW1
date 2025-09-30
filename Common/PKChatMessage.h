@@ -4,7 +4,7 @@
 #include "PacketDef.h"
 #include <vector>
 
-class PKChatMessage : IPacket
+class PKChatMessage : public IPacket
 {
 public:
     ChatMessagePacket pkt;
