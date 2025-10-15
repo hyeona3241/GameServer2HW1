@@ -47,6 +47,7 @@
 	#include <iostream>
 	#include <mutex>
 	#include <queue>
+	#include <chrono>
 
 	#include "PKChatMessage.h"
 	#include "PKExit.h"
