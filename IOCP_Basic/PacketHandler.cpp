@@ -2,6 +2,58 @@
 #include <cstring>
 #include <string>
 
+static void ProcessOnePacket(PacketHandler * self, Session * s, const char* buf, size_t len) {
+    if (len < sizeof(PacketHeader)) {
+        Logger::Instance().Error("Invalid packet: too short (len=" + std::to_string(len) + ")");
+        return;
+    }
+    PacketHeader h;
+    std::memcpy(&h, buf, sizeof(PacketHeader));
+    if (!PacketHandler::IsHeaderValid(h) || len < h.size) {
+        Logger::Instance().Error("Invalid header or size mismatch (session=" + std::to_string(s->id) + ")");
+        return;
+    }
+    const auto id = static_cast<PacketType>(h.id);
+    switch (id) {
+    case PacketType::ChatMessage:
+        if (h.size == sizeof(ChatMessagePacket)) {
+            ChatMessagePacket p{};
+            std::memcpy(&p, buf, sizeof(p));
+            self->HandleChatMessage(s, p);
+        }
+        else {
+            Logger::Instance().Error("Size mismatch for ChatMessage packet. expected="
+                + std::to_string(sizeof(ChatMessagePacket)) + " got=" + std::to_string(h.size)
+                + " (session=" + std::to_string(s->id) + ")");
+        }
+        break;
+    case PacketType::Exit:
+        if (h.size == sizeof(PacketHeader)) {
+            self->HandleExit(s);
+        }
+        else {
+            Logger::Instance().Error("Size mismatch for Exit packet. expected="
+                + std::to_string(sizeof(PacketHeader)) + " got=" + std::to_string(h.size)
+                + " (session=" + std::to_string(s->id) + ")");
+        }
+        break;
+    case PacketType::UserCount:
+        if (h.size == sizeof(PacketHeader)) {
+            self->HandleUserCount(s);
+        }
+        else {
+            Logger::Instance().Error("Size mismatch for UserCount packet. expected="
+                + std::to_string(sizeof(PacketHeader)) + " got=" + std::to_string(h.size)
+                + " (session=" + std::to_string(s->id) + ")");
+        }
+        break;
+    default:
+        Logger::Instance().Error("Unknown packet id=" + std::to_string(static_cast<int>(id))
+            + " size=" + std::to_string(h.size) + " (session=" + std::to_string(s->id) + ")");
+        break;
+    }
+}
+
 void PacketHandler::OnClientConnected(Session* s) {
     Logger::Instance().Info("New connection: session=" + std::to_string(s->id));
     static const char kAskId[] = "[서버] 아이디를 입력하세요. 첫 번째 메시지가 아이디로 등록됩니다.\n";
@@ -10,7 +62,7 @@ void PacketHandler::OnClientConnected(Session* s) {
 }
 
 void PacketHandler::OnBytes(Session* s, const char* buf, size_t len) {
-    if (len < sizeof(PacketHeader)) {
+    /*if (len < sizeof(PacketHeader)) {
         Logger::Instance().Error("Invalid packet: too short (len=" + std::to_string(len) + ")");
         return;
     }
@@ -61,8 +113,18 @@ void PacketHandler::OnBytes(Session* s, const char* buf, size_t len) {
         Logger::Instance().Error("Unknown packet id=" + std::to_string(static_cast<int>(id))
             + " size=" + std::to_string(h.size) + " (session=" + std::to_string(s->id) + ")");
         break;
+    }*/
+
+    ProcessOnePacket(this, s, buf, len);
+}
+
+void PacketHandler::OnPacket(Session* s, const std::vector<char>& packet) {
+    if (packet.size() < sizeof(PacketHeader)) {
+        Logger::Instance().Error("OnPacket: too short (session=" + std::to_string(s->id) + ")");
+        return;
     }
 
+    ProcessOnePacket(this, s, packet.data(), packet.size());
 }
 
 void PacketHandler::HandleChatMessage(Session* sender, const ChatMessagePacket& pkt) {

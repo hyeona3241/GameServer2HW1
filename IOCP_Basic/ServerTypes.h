@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Utility.h>
+#include "RingBuffer.h"
 
 // AcceptEx 확장 함수 포인터 타입 정의
 typedef BOOL(PASCAL* LPFN_ACCEPTEX)
@@ -37,26 +38,12 @@ struct OverlappedEx : public OVERLAPPED {
 struct Session {
     SOCKET sock;                             // 클라이언트 소켓
     char* rxBuf;                             // 수신 버퍼(버퍼 풀에서 임대)
-    size_t rxUsed;                           // 현재까지 받은 데이터 크기
+    //size_t rxUsed;                           // 현재까지 받은 데이터 크기
+    RingBuffer   rx;                         // 세션 고유 수신 링버퍼
     std::queue<std::vector<char>> sendQueue; // 송신 대기 큐(여러 패킷 병합 가능)
     OverlappedEx ovRecv, ovSend;             // 수신/송신용 OVERLAPPED 구조체
     std::atomic<bool> sending;               // 송신 중 여부(중복 송신 방지)
     std::atomic<bool> closing;               // 종료 처리 중 여부(이중 종료 방지)
     uint64_t id;                             // 세션 고유 ID(디버깅/모니터링용)
-    Session() : sock(INVALID_SOCKET), rxBuf(nullptr), rxUsed(0), sending(false), closing(false), id(0) {}
+    Session() : sock(INVALID_SOCKET), rxBuf(nullptr), /*rxUsed(0),*/ rx(64 * 1024), sending(false), closing(false), id(0) {}
 };
-
-// 고정 크기 버퍼 풀(성능 최적화)
-// 세션의 수신 버퍼를 힙 대신 풀에서 임대/반납
-class BufferPool {
-public:
-    BufferPool(size_t blockSize, size_t initialCount);
-    ~BufferPool();
-    char* Allocate();    // 버퍼 임대
-    void Release(char* buf); // 버퍼 반납
-private:
-    std::mutex mtx_;             // 동시 접근 보호용 뮤텍스
-    std::vector<char*> pool_;    // 버퍼 포인터 리스트
-    size_t blockSize_;           // 버퍼 크기
-};
-

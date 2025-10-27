@@ -2,13 +2,14 @@
 #include "IOCP_EchoServer.h"
 
 // 생성자: 포트, 워커 스레드 수, AcceptEx 개수 등 초기화
-IOCP_EchoServer::IOCP_EchoServer(unsigned short port, int workerCount, int acceptCount)
+IOCP_EchoServer::IOCP_EchoServer(unsigned short port, int workerCount, int acceptCount, size_t maxSessions)
     : listenSocket_(INVALID_SOCKET), iocpHandle_(NULL), running_(false), port_(port),
     fnAcceptEx_(nullptr), fnGetAcceptExSockaddrs_(nullptr),
     bufferPool_(NetConfig::BUFFER_SIZE, 128), sessionIdGen_(1),
     acceptOutstanding_(acceptCount ? acceptCount : NetConfig::DEFAULT_ACCEPT),
     workerCount_(workerCount ? workerCount : (int)std::thread::hardware_concurrency()),
-    statCurConn_(0), statAccept_(0), statRecv_(0), statSend_(0)
+    statCurConn_(0), statAccept_(0), statRecv_(0), statSend_(0),
+    sessionPool_(maxSessions)
 {
 }
 
@@ -141,13 +142,20 @@ void IOCP_EchoServer::AcceptCompletion(OverlappedEx* ov, DWORD /*bytes*/) {
     setsockopt(ov->acceptSock, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char*)&listenSocket_, sizeof(listenSocket_));
 
     // 새 세션 생성 및 초기화
-    auto* session = new Session();
+    Session* session = sessionPool_.Acquire();
+    if (!session) {
+        closesocket(ov->acceptSock);
+        PostAccept();
+        delete ov;
+        return;
+    
+    }
     session->sock = ov->acceptSock;
-    session->rxBuf = bufferPool_.Allocate();
-    session->rxUsed = 0;
     session->id = sessionIdGen_++;
     session->sending = false;
     session->closing = false;
+    session->rx.clear();
+    session->rxBuf = bufferPool_.Allocate();
 
     // 세션 테이블에 등록(동시성 보호)
     {
@@ -177,8 +185,8 @@ void IOCP_EchoServer::PostRecv(Session* session) {
     ZeroMemory(&session->ovRecv, sizeof(OverlappedEx));
     session->ovRecv.op = OverlappedEx::OP_RECV;
     session->ovRecv.session = session;
-    session->ovRecv.wsaBuf.buf = session->rxBuf + session->rxUsed;
-    session->ovRecv.wsaBuf.len = NetConfig::BUFFER_SIZE - (ULONG)session->rxUsed;
+    session->ovRecv.wsaBuf.buf = session->rxBuf;
+    session->ovRecv.wsaBuf.len = NetConfig::BUFFER_SIZE;
 
     DWORD flags = 0, recvBytes = 0;
     int ret = WSARecv(session->sock, &session->ovRecv.wsaBuf, 1, &recvBytes, &flags, &session->ovRecv, NULL);
@@ -195,8 +203,8 @@ void IOCP_EchoServer::RecvCompletion(Session* session, DWORD bytes) {
         CloseSession(session);
         return;
     }
-    session->rxUsed += bytes;
-    statRecv_++;
+    /*session->rxUsed += bytes;
+    statRecv_++;*/
 
     //// --- 채팅: 모든 세션에 메시지 브로드캐스트 ---
     //std::vector<Session*> sessions;
@@ -213,8 +221,35 @@ void IOCP_EchoServer::RecvCompletion(Session* session, DWORD bytes) {
     //}
     //session->rxUsed = 0;
 
-    handler_.OnBytes(session, session->rxBuf, session->rxUsed);
-    session->rxUsed = 0;
+    /*handler_.OnBytes(session, session->rxBuf, session->rxUsed);
+    session->rxUsed = 0;*/
+
+    statRecv_++;
+
+    // 수신 바이트를 세션 링버퍼에 누적
+    const size_t appended = session->rx.append(session->rxBuf, (size_t)bytes);
+    if (appended < bytes) {
+        /*Logger::Instance().Warn("RingBuffer overflow: id=" + std::to_string(session->id));*/
+        CloseSession(session);
+        return;
+        
+    }
+    // 프레이머로 완성 패킷을 모두 꺼내 처리
+    std::vector<char> pkt;
+    for (;;) {
+        auto r = framer_.Pop(session->rx, pkt); // Result::Ok / NeedMore / Malformed
+        if (r == PacketFramer::Result::Ok) {
+            handler_.OnPacket(session, pkt);
+            continue;
+            
+        }
+        if (r == PacketFramer::Result::NeedMore) break;
+        // Malformed
+        /*Logger::Instance().Warn("Malformed packet: id=" + std::to_string(session->id));*/
+        CloseSession(session);
+        return;
+      
+    }
 
     // 다음 수신 요청 등록(연속 수신)
     PostRecv(session);
@@ -282,13 +317,20 @@ void IOCP_EchoServer::SendCompletion(Session* session, DWORD /*bytes*/) {
 void IOCP_EchoServer::CloseSession(Session* session) {
     if (!session || session->closing.exchange(true)) return;
     closesocket(session->sock);
-    bufferPool_.Release(session->rxBuf);
+
+    if (session->rxBuf) {
+        bufferPool_.Release(session->rxBuf);
+        session->rxBuf = nullptr;
+        
+    }
+
     {
         std::lock_guard<std::mutex> lock(sessionMtx_);
         sessionTable_.erase(session->id);
     }
+
     statCurConn_--;
-    delete session;
+    sessionPool_.Release(session);
 }
 
 int IOCP_EchoServer::GetCurrentConnectionCount() const

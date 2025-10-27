@@ -132,11 +132,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BufferPool.h" />
     <ClInclude Include="IOCP_EchoServer.h" />
+    <ClInclude Include="PacketFramer.h" />
     <ClInclude Include="PacketHandler.h" />
+    <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="ServerTypes.h" />
+    <ClInclude Include="SessionPool.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BufferPool.cpp" />
     <ClCompile Include="IOCP_EchoServer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PacketHandler.cpp" />

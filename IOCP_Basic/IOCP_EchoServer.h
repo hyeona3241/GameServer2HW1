@@ -5,12 +5,15 @@
 #include "ServerTypes.h"
 #include "PacketHandler.h"
 #include "Logger.h"
+#include "BufferPool.h"
+#include "PacketFramer.h"
+#include "SessionPool.h"
 
 // IOCP 기반 에코 서버 클래스
 class IOCP_EchoServer : public ISendClose {
 public:
     // 포트, 워커 스레드 수, AcceptEx 개수 지정(0이면 자동 결정)
-    IOCP_EchoServer(unsigned short port, int workerCount = 0, int acceptCount = 0);
+    IOCP_EchoServer(unsigned short port, int workerCount = 0, int acceptCount = 0, size_t maxSessions = 1024);
     ~IOCP_EchoServer();
     bool Start();    // 서버 시작
     void Stop();     // 서버 정지 및 리소스 해제
@@ -60,6 +63,8 @@ private:
     std::atomic<uint64_t> sessionIdGen_;     // 세션 ID 발급기
     int acceptOutstanding_;                  // 동시에 등록할 AcceptEx 개수
     int workerCount_;                        // 워커 스레드 수
+    SessionPool sessionPool_;                // 세션 재사용 풀
+    PacketFramer framer_;                    // 패킷 프레이머(수신 조립)
 
     // 통계 변수(접속 수, 초당 accept/recv/send)
     std::atomic<int> statCurConn_;

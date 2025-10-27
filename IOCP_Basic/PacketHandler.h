@@ -32,7 +32,9 @@ public:
     // NOTE: 지금은 단순화. 추후 프레이머로 다중/부분 패킷 조립 예정.
     void OnBytes(Session* s, const char* buf, size_t len);
 
-private:
+    void OnPacket(Session* s, const std::vector<char>& packet);
+
+public:
     // 개별 패킷 처리
     void HandleChatMessage(Session* s, const ChatMessagePacket& pkt);
     void HandleExit(Session* s);
