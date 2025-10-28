@@ -99,8 +99,61 @@ void EchoClient::receiveLoop()
             std::cout << "서버 연결 종료 또는 recv 실패\n";
             break;
         }
-        rxBuf_[received] = '\0';
-        std::cout << rxBuf_/* << std::endl*/;
+        if (received >= sizeof(PacketHeader)) {
+            PacketHeader header;
+            std::memcpy(&header, rxBuf_, sizeof(PacketHeader));
+
+            switch (static_cast<PacketType>(header.id)) {
+            case PacketType::LoginAck:
+                if (received >= header.size && header.size == sizeof(PacketHeader) + sizeof(PKLoginAckBody)) {
+                    PKLoginAck ack;
+                    ack.Deserialize(rxBuf_, received);
+
+                    if (ack.body.accepted) {
+                        std::cout << "[서버] 로그인 성공! 세션ID=" << ack.body.sessionId << " 현재 접속자 수=" << ack.body.currentUsers << "\n";
+                        std::cout << "[알림] 아이디가 '" << nickname_ << "'(으)로 설정되었습니다.\n\n";
+                    }
+                    else
+                        std::cout << "[서버] 로그인 실패: " << ack.body.reason << "\n";
+                }
+                else {
+                    std::cout << "[경고] 잘못된 LoginAck 패킷 수신(" << header.size << "B)\n";
+                }
+                break;
+            
+            case PacketType::ChatBroadcast: 
+                if (received >= header.size && header.size == sizeof(PacketHeader) + sizeof(PKChatBroadcastBody)) {
+                    PKChatBroadcast b;
+                    b.Deserialize(rxBuf_, received);
+                    std::cout << "[" << b.body.sender << "] " << b.body.message << "\n";
+                }
+                else {
+                    std::cout << "[경고] 잘못된 ChatBroadcast 패킷(" << header.size << "B)\n";
+                }
+                break;
+
+            case PacketType::UserCountAck:
+                if (received >= header.size && header.size == sizeof(PacketHeader) + sizeof(int32_t)) {
+                    PKUserCountAck ack;
+                    ack.Deserialize(rxBuf_, received);
+                    std::cout << "[서버] 현재 접속자 수: " << ack.body.count << "\n";
+                }
+                else {
+                    std::cout << "[경고] 잘못된 UserCountAck 패킷 수신 (" << header.size << "바이트)\n";
+                }
+                break;
+
+            default:
+                rxBuf_[received] = '\0';
+                std::cout << rxBuf_;
+                break;
+            }
+        }
+        else {
+            // 패킷 헤더 없으면 문자열 취급
+            rxBuf_[received] = '\0';
+            std::cout << rxBuf_;
+        }
     }
     // 수신이 끝나면 전체 종료
     stop();
@@ -116,17 +169,21 @@ void EchoClient::sendLoop()
 
         if (nickname_.empty() && line != "/나가기" && line != "/접속자수" && line != "/에러로그") {
             nickname_ = line;
-            std::cout << "[알림] 아이디가 '" << nickname_ << "'(으)로 설정되었습니다.\n\n";
+            PKLoginReq req(nickname_.c_str());
+            if (!sendPacket(req)) std::cout << "LoginReq 전송 실패\n";
+
             continue;
         }
 
         if (line == "/나가기") {
-            PKExit pk;
+            PKExit pk(nickname_.c_str());          // 닉네임 포함
+            auto bytes = pk.Serialize();
+
             if (!sendPacket(pk)) std::cout << "Exit 패킷 전송 실패\n";
             break;
         }
         else if (line == "/접속자수") {
-            PKUserCount pk;
+            PKUserCountReq pk;
             if (!sendPacket(pk)) std::cout << "UserCount 패킷 전송 실패\n";
             continue;
         }

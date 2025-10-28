@@ -8,6 +8,11 @@ struct ChatMessageData;
 
 class Logger
 {
+private:
+    std::ofstream info_;
+    std::ofstream error_;
+    std::mutex mtx_;
+
 public:
     static Logger& Instance();
 
@@ -15,6 +20,7 @@ public:
     void Shutdown();
 
     void Info(const std::string& msg);
+    void Warn(const std::string& msg);
     void Error(const std::string& msg);
 
     // 채팅 로그도 Info와 동일하게 일반 로그 파일에 기록
@@ -28,8 +34,6 @@ private:
 
     std::string NowString() const;
 
-    std::ofstream info_;
-    std::ofstream error_;
-    std::mutex mtx_;
+    void WriteLineTo(std::ofstream& out, const char* levelTag, const std::string& msg);
 };
 

@@ -14,3 +14,60 @@
 [2025-09-30 23:45:42.503] Chat [session 1] [aaa] ±¦ÂúÀº°É
 [2025-09-30 23:45:43.335] Chat [session 1] [aaa] ±»
 [2025-09-30 23:45:50.295] Exit packet: session=1
+[2025-10-28 10:39:12.096] [Info] Server started on port 9000
+[2025-10-28 10:39:27.909] [Info] New connection: session=1
+[2025-10-28 10:39:32.060] [Info] UserCount request from session=1
+[2025-10-28 11:19:27.583] [Info] Server started on port 9000
+[2025-10-28 11:19:44.835] [Info] New connection: session=1
+[2025-10-28 11:20:02.553] [Info] New connection: session=2
+[2025-10-28 11:20:10.409] [Info] Chat [session 1] [aaa] ¾È³ç
+[2025-10-28 11:20:14.164] [Info] Chat [session 2] [vvv] ¹Ý°¡¿ö
+[2025-10-28 11:20:20.002] [Info] UserCount request from session=2
+[2025-10-28 11:20:25.810] [Info] Exit packet: session=2
+[2025-10-28 11:20:29.428] [Info] UserCount request from session=1
+[2025-10-28 11:20:32.348] [Info] Exit packet: session=1
+[2025-10-28 11:22:46.304] [Info] Server started on port 9000
+[2025-10-28 11:22:56.739] [Info] New connection: session=1
+[2025-10-28 11:23:15.721] [Info] Chat [session 1] [aaa] gma?
+[2025-10-28 11:23:17.528] [Info] Chat [session 1] [aaa] anjwl
+[2025-10-28 13:41:24.094] [Info] Server started on port 9000
+[2025-10-28 13:42:06.511] [Info] New connection: session=1
+[2025-10-28 13:42:10.007] [Info] LoginReq from session=1 nick='aaa' accepted=1
+[2025-10-28 13:42:22.823] [Info] UserCount request from session=1
+[2025-10-28 14:02:22.692] [Info] Server started on port 9000
+[2025-10-28 14:02:36.381] [Info] New connection: session=1
+[2025-10-28 14:02:40.796] [Info] New connection: session=2
+[2025-10-28 14:02:42.466] [Info] LoginReq from session=2 nick='aaa' accepted=1
+[2025-10-28 14:02:47.673] [Info] LoginReq from session=1 nick='ccc' accepted=1
+[2025-10-28 14:03:09.008] [Info] Chat [session 2] [aaa] aaa
+[2025-10-28 14:03:11.238] [Info] Chat [session 1] [ccc] bbb
+[2025-10-28 14:03:12.234] [Info] Chat [session 1] [ccc] ccc
+[2025-10-28 14:03:12.894] [Info] Chat [session 1] [ccc] ddd
+[2025-10-28 14:40:42.162] [Info] Server started on port 9000
+[2025-10-28 14:40:59.981] [Info] New connection: session=1
+[2025-10-28 14:41:02.340] [Info] LoginReq from session=1 nick='aaa' accepted=1
+[2025-10-28 14:41:08.299] [Info] New connection: session=2
+[2025-10-28 14:41:09.651] [Info] LoginReq from session=2 nick='bbbb' accepted=1
+[2025-10-28 14:41:17.013] [Info] Chat [session 1] [aaa] ¾È³ç
+[2025-10-28 14:41:23.147] [Info] Chat [session 2] [bbbb] ±×·¡ ¾È³ç
+[2025-10-28 14:41:27.429] [Info] UserCount request from session=1
+[2025-10-28 14:41:44.748] [Info] UserCount request from session=2
+[2025-10-28 14:42:55.026] [Info] New connection: session=3
+[2025-10-28 14:42:57.696] [Info] LoginReq from session=3 nick='ccc' accepted=1
+[2025-10-28 14:43:06.465] [Info] New connection: session=4
+[2025-10-28 14:43:21.798] [Info] Server started on port 9000
+[2025-10-28 14:43:31.314] [Info] New connection: session=1
+[2025-10-28 14:43:33.686] [Info] LoginReq from session=1 nick='ccc'' accepted=1
+[2025-10-28 14:43:38.284] [Info] New connection: session=2
+[2025-10-28 14:43:39.286] [Info] LoginReq from session=2 nick='dddd' accepted=1
+[2025-10-28 14:43:57.505] [Info] UserCount request from session=1
+[2025-10-28 14:44:01.781] [Info] Chat [session 2] [dddd] dkdlt
+[2025-10-28 14:44:02.937] [Info] Chat [session 2] [dddd] sjflkaj
+[2025-10-28 14:44:03.873] [Info] Chat [session 2] [dddd] afjlkj
+[2025-10-28 14:48:07.904] [Info] Server started on port 9000
+[2025-10-28 14:48:36.807] [Info] New connection: session=1
+[2025-10-28 14:48:38.689] [Info] LoginReq from session=1 nick='bbb' accepted=1
+[2025-10-28 14:48:44.594] [Info] New connection: session=2
+[2025-10-28 14:48:45.710] [Info] LoginReq from session=2 nick='ccc' accepted=1
+[2025-10-28 14:48:46.720] [Info] Chat [session 2] [ccc] lfkdjalkjfd
+[2025-10-28 14:48:54.707] [Info] Exit packet: session=1

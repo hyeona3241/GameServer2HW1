@@ -47,20 +47,28 @@ string Logger::NowString() const {
     return oss.str();
 }
 
+void Logger::WriteLineTo(std::ofstream& out, const char* levelTag, const std::string& msg)
+{
+    if (!out.is_open()) return;
+
+    out << "[" << NowString() << "] " << "[" << levelTag << "] " << msg << '\n';
+    out.flush();
+}
+
 void Logger::Info(const string& msg) {
     lock_guard<mutex> lock(mtx_);
-    if (info_.is_open()) {
-        info_ << "[" << NowString() << "] " << msg << '\n';
-        info_.flush();
-    }
+    WriteLineTo(info_, "Info", msg);
+}
+
+void Logger::Warn(const std::string& msg)
+{
+    lock_guard<mutex> lock(mtx_);
+    WriteLineTo(info_, "Warn", msg);
 }
 
 void Logger::Error(const string& msg) {
     lock_guard<mutex> lock(mtx_);
-    if (error_.is_open()) {
-        error_ << "[" << NowString() << "] " << msg << '\n';
-        error_.flush();
-    }
+    WriteLineTo(error_, "Error", msg);
 }
 
 void Logger::Chat(const ChatMessageData& d, uint64_t sid) {

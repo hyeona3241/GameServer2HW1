@@ -1,3 +1,8 @@
 [2025-09-30 23:42:52.688] Invalid header or size mismatch (session=1)
 [2025-09-30 23:45:46.895] Invalid header or size mismatch (session=1)
 [2025-09-30 23:45:49.111] Invalid header or size mismatch (session=1)
+[2025-10-28 11:19:47.368] [Error] Size mismatch for UserCount packet. expected=4 got=36 (session=1)
+[2025-10-28 11:20:04.181] [Error] Size mismatch for UserCount packet. expected=4 got=36 (session=2)
+[2025-10-28 11:23:11.104] [Error] Size mismatch for UserCount packet. expected=4 got=36 (session=1)
+[2025-10-28 14:41:46.985] [Error] Size mismatch for Exit packet. expected=4 got=36 (session=2)
+[2025-10-28 14:43:59.257] [Error] Size mismatch for Exit packet. expected=4 got=36 (session=1)

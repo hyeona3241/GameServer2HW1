@@ -37,8 +37,9 @@ public:
 public:
     // 개별 패킷 처리
     void HandleChatMessage(Session* s, const ChatMessagePacket& pkt);
-    void HandleExit(Session* s);
+    void HandleExit(Session* s, const char* buf, size_t len);
     void HandleUserCount(Session* s);
+    void HandleLogin(Session* s, const char* buf, size_t len);
 
     // 단순 검증
     static bool IsHeaderValid(const PacketHeader& h) {

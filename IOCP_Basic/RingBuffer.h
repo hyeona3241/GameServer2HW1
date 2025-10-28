@@ -9,7 +9,9 @@ class RingBuffer
 {
 private:
     std::vector<std::uint8_t> buf_;
-    size_t head_, tail_, size_;
+    size_t head_; 
+    size_t tail_; 
+    size_t size_;
 
 public:
     explicit RingBuffer(size_t capacity = 64 * 1024)

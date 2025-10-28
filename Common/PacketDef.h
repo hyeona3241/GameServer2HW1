@@ -9,7 +9,15 @@ enum class PacketType : uint16_t {
     None = 0,
     ChatMessage = 1,   // 일반 채팅 메시지
     Exit = 2,   // 종료 패킷
-    UserCount = 3    // 접속자 수 확인
+    UserCount = 3,    // 접속자 수 확인
+
+    ChatBroadcast = 10,
+
+    LoginReq = 11,
+    LoginAck = 12,
+
+    UserCountReq = 13,
+    UserCountAck = 14,
     // 필요 시 계속 추가
 };
 

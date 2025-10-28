@@ -229,7 +229,7 @@ void IOCP_EchoServer::RecvCompletion(Session* session, DWORD bytes) {
     // 수신 바이트를 세션 링버퍼에 누적
     const size_t appended = session->rx.append(session->rxBuf, (size_t)bytes);
     if (appended < bytes) {
-        /*Logger::Instance().Warn("RingBuffer overflow: id=" + std::to_string(session->id));*/
+        Logger::Instance().Warn("RingBuffer overflow: id=" + std::to_string(session->id));
         CloseSession(session);
         return;
         
@@ -245,7 +245,7 @@ void IOCP_EchoServer::RecvCompletion(Session* session, DWORD bytes) {
         }
         if (r == PacketFramer::Result::NeedMore) break;
         // Malformed
-        /*Logger::Instance().Warn("Malformed packet: id=" + std::to_string(session->id));*/
+        Logger::Instance().Warn("Malformed packet: id=" + std::to_string(session->id));
         CloseSession(session);
         return;
       

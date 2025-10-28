@@ -105,7 +105,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -137,18 +137,28 @@
     <ClInclude Include="IPacket.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="PacketDef.h" />
+    <ClInclude Include="PKChatBroadcast.h" />
     <ClInclude Include="PKChatMessage.h" />
     <ClInclude Include="PKExit.h" />
+    <ClInclude Include="PKLoginAck.h" />
+    <ClInclude Include="PKLoginReq.h" />
     <ClInclude Include="PKUserCount.h" />
+    <ClInclude Include="PKUserCountAck.h" />
+    <ClInclude Include="PKUserCountReq.h" />
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IPacket.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="PacketDef.cpp" />
+    <ClCompile Include="PKChatBroadcast.cpp" />
     <ClCompile Include="PKChatMessage.cpp" />
     <ClCompile Include="PKExit.cpp" />
+    <ClCompile Include="PKLoginAck.cpp" />
+    <ClCompile Include="PKLoginReq.cpp" />
     <ClCompile Include="PKUserCount.cpp" />
+    <ClCompile Include="PKUserCountAck.cpp" />
+    <ClCompile Include="PKUserCountReq.cpp" />
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

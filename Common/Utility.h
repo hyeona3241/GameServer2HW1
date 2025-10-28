@@ -35,6 +35,11 @@
 	#include "PKChatMessage.h"
 	#include "PKExit.h"
 	#include "PKUserCount.h"
+	#include "PKUserCountReq.h"
+	#include "PKUserCountAck.h"
+	#include "PKLoginReq.h"
+	#include "PKLoginAck.h"
+	#include "PKChatBroadcast.h"
 
 #elif defined(CORE_CLIENT)
 
@@ -52,6 +57,11 @@
 	#include "PKChatMessage.h"
 	#include "PKExit.h"
 	#include "PKUserCount.h"
+	#include "PKUserCountReq.h"
+	#include "PKUserCountAck.h"
+	#include "PKLoginReq.h"
+	#include "PKLoginAck.h"
+	#include "PKChatBroadcast.h"
 
 #else
 	// 아무 타깃도 지정 안 됐을 때 경고

@@ -1,25 +1,15 @@
 #pragma once
-
 #include "IPacket.h"
 #include "PacketDef.h"
 #include <vector>
 
-#pragma pack(push,1)
-struct PKExitBody {
-    char nickname[32];
-};
-#pragma pack(pop)
-
-class PKExit : public IPacket
+class PKUserCountReq :  public IPacket
 {
 public:
     PacketHeader header;
-    PKExitBody body{};
 
-    PKExit();
-
-    explicit PKExit(const char* nick);
-    explicit PKExit(const PacketHeader& h);
+    PKUserCountReq();
+    explicit PKUserCountReq(const PacketHeader& h);
 
     std::vector<char> Serialize() const override;
     void Deserialize(const char* buffer, size_t bufferSize) override;
